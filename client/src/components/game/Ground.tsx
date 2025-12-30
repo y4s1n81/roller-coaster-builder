@@ -5,11 +5,11 @@ export function Ground() {
   const texture = useTexture("/textures/grass.png");
   
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(50, 50);
+  texture.repeat.set(200, 200);
   
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
-      <planeGeometry args={[200, 200]} />
+      <planeGeometry args={[800, 800]} />
       <meshStandardMaterial map={texture} />
     </mesh>
   );

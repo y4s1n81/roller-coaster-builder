@@ -70,7 +70,7 @@ export function TrackBuilder() {
         onPointerDown={handlePointerDown}
         visible={false}
       >
-        <planeGeometry args={[200, 200]} />
+        <planeGeometry args={[800, 800]} />
         <meshBasicMaterial transparent opacity={0} />
       </mesh>
       
