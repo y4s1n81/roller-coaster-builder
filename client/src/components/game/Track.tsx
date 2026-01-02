@@ -86,15 +86,18 @@ export function Track() {
       const loopInfo = getLoopMetaAt(t);
       
       if (loopInfo && loopInfo.meta) {
-        // Use PURE reference frame from loop metadata - no orthogonalization against actual tangent
+        // Use COMPLETE reference frame from loop metadata - including tangent!
         const meta = loopInfo.meta;
         const theta = loopInfo.theta;
         
+        // Reference TANGENT for ideal circular loop: d/dθ of position = cos(θ)*forward + sin(θ)*up
+        // This is the key fix - we must NOT use the spline tangent which has helical torsion
+        const refTangent = new THREE.Vector3()
+          .addScaledVector(meta.forward, Math.cos(theta))
+          .addScaledVector(meta.up, Math.sin(theta))
+          .normalize();
+        
         // Inward radial pointing toward loop center: -sin(θ)*forward + cos(θ)*up
-        // At θ=0: up (correct - pointing up at entry)
-        // At θ=π/2: -forward (pointing back toward center)
-        // At θ=π: -up (pointing down at top)
-        // At θ=3π/2: forward (pointing forward toward center)
         up = new THREE.Vector3()
           .addScaledVector(meta.forward, -Math.sin(theta))
           .addScaledVector(meta.up, Math.cos(theta))
@@ -103,11 +106,13 @@ export function Track() {
         // Normal (sideways) is always the right vector - constant throughout the loop
         normal = meta.right.clone();
         
-        // DO NOT orthogonalize against actual tangent - use pure reference frame
-        // This prevents the helical offset from affecting orientation
+        // OVERRIDE the spline tangent with our reference tangent
+        // This is critical - the sleeper/tie rotation uses tangent, and helical tangent causes twist
+        railData.push({ point, tilt, tangent: refTangent, normal });
         
         prevUp.copy(up);
-        prevTangent.copy(tangent);
+        prevTangent.copy(refTangent);
+        continue; // Skip the normal push at end of loop
       } else {
         // Standard parallel transport for non-loop sections
         if (i === 0) {
