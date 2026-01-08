@@ -3,14 +3,17 @@ import { create } from "zustand";
 interface AudioState {
   backgroundMusic: HTMLAudioElement | null;
   daylightMusic: HTMLAudioElement | null;
+  nightMusic: HTMLAudioElement | null;
   hitSound: HTMLAudioElement | null;
   successSound: HTMLAudioElement | null;
   isMuted: boolean;
   isDaylightMusicPlaying: boolean;
+  isNightMusicPlaying: boolean;
   
   // Setter functions
   setBackgroundMusic: (music: HTMLAudioElement) => void;
   setDaylightMusic: (music: HTMLAudioElement) => void;
+  setNightMusic: (music: HTMLAudioElement) => void;
   setHitSound: (sound: HTMLAudioElement) => void;
   setSuccessSound: (sound: HTMLAudioElement) => void;
   
@@ -20,18 +23,23 @@ interface AudioState {
   playSuccess: () => void;
   playDaylightMusic: () => void;
   stopDaylightMusic: () => void;
+  playNightMusic: () => void;
+  stopNightMusic: () => void;
 }
 
 export const useAudio = create<AudioState>((set, get) => ({
   backgroundMusic: null,
   daylightMusic: null,
+  nightMusic: null,
   hitSound: null,
   successSound: null,
-  isMuted: false, // Start unmuted to allow daylight music
+  isMuted: false,
   isDaylightMusicPlaying: false,
+  isNightMusicPlaying: false,
   
   setBackgroundMusic: (music) => set({ backgroundMusic: music }),
   setDaylightMusic: (music) => set({ daylightMusic: music }),
+  setNightMusic: (music) => set({ nightMusic: music }),
   setHitSound: (sound) => set({ hitSound: sound }),
   setSuccessSound: (sound) => set({ successSound: sound }),
   
@@ -99,6 +107,28 @@ export const useAudio = create<AudioState>((set, get) => ({
       daylightMusic.pause();
       daylightMusic.currentTime = 0;
       set({ isDaylightMusicPlaying: false });
+    }
+  },
+  
+  playNightMusic: () => {
+    const { nightMusic, isMuted, isNightMusicPlaying } = get();
+    if (nightMusic && !isNightMusicPlaying) {
+      nightMusic.loop = true;
+      nightMusic.volume = 0.5;
+      
+      if (!isMuted) {
+        nightMusic.play().catch(() => {});
+      }
+      set({ isNightMusicPlaying: true });
+    }
+  },
+  
+  stopNightMusic: () => {
+    const { nightMusic } = get();
+    if (nightMusic) {
+      nightMusic.pause();
+      nightMusic.currentTime = 0;
+      set({ isNightMusicPlaying: false });
     }
   }
 }));

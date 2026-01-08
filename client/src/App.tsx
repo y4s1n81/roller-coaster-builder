@@ -13,37 +13,53 @@ import { useAudio } from "./lib/stores/useAudio";
 
 function MusicController() {
   const { isNightMode } = useRollerCoaster();
-  const { setDaylightMusic, playDaylightMusic, stopDaylightMusic, daylightMusic, isMuted } = useAudio();
+  const { 
+    setDaylightMusic, playDaylightMusic, stopDaylightMusic, daylightMusic,
+    setNightMusic, playNightMusic, stopNightMusic, nightMusic,
+    isMuted 
+  } = useAudio();
   
   useEffect(() => {
-    const music = new Audio("/sounds/music.mp3");
-    music.loop = true;
-    music.volume = 0.5;
-    setDaylightMusic(music);
+    const dayMusic = new Audio("/sounds/music.mp3");
+    dayMusic.loop = true;
+    dayMusic.volume = 0.5;
+    setDaylightMusic(dayMusic);
+    
+    const nightMusicAudio = new Audio("/sounds/lovelyday.mp3");
+    nightMusicAudio.loop = true;
+    nightMusicAudio.volume = 0.5;
+    setNightMusic(nightMusicAudio);
     
     return () => {
-      music.pause();
-      music.src = "";
+      dayMusic.pause();
+      dayMusic.src = "";
+      nightMusicAudio.pause();
+      nightMusicAudio.src = "";
     };
-  }, [setDaylightMusic]);
+  }, [setDaylightMusic, setNightMusic]);
   
   useEffect(() => {
-    if (!isNightMode) {
-      playDaylightMusic();
-    } else {
+    if (isNightMode) {
       stopDaylightMusic();
+      playNightMusic();
+    } else {
+      stopNightMusic();
+      playDaylightMusic();
     }
-  }, [isNightMode, playDaylightMusic, stopDaylightMusic]);
+  }, [isNightMode, playDaylightMusic, stopDaylightMusic, playNightMusic, stopNightMusic]);
   
   useEffect(() => {
-    if (daylightMusic) {
-      if (isMuted) {
-        daylightMusic.pause();
-      } else if (!isNightMode) {
+    if (isMuted) {
+      if (daylightMusic) daylightMusic.pause();
+      if (nightMusic) nightMusic.pause();
+    } else {
+      if (isNightMode && nightMusic) {
+        nightMusic.play().catch(() => {});
+      } else if (!isNightMode && daylightMusic) {
         daylightMusic.play().catch(() => {});
       }
     }
-  }, [isMuted, daylightMusic, isNightMode]);
+  }, [isMuted, daylightMusic, nightMusic, isNightMode]);
   
   return null;
 }
