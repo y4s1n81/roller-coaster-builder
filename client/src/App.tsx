@@ -21,14 +21,17 @@ function MusicController() {
   useEffect(() => {
     const getBasePath = () => {
       const path = window.location.pathname;
-      if (path.includes('/roller-coaster-builder')) {
-        return '/roller-coaster-builder/';
+      const origin = window.location.origin;
+      if (path.startsWith('/roller-coaster-builder')) {
+        return `${origin}/roller-coaster-builder/`;
       }
-      return '/';
+      return `${origin}/`;
     };
     const base = getBasePath();
+    console.log('Audio base path:', base);
     
     const dayMusic = new Audio(`${base}sounds/music.mp3`);
+    console.log('Day music URL:', dayMusic.src);
     dayMusic.loop = true;
     dayMusic.volume = 0.5;
     setDaylightMusic(dayMusic);
