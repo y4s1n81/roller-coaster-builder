@@ -1,8 +1,14 @@
 import { useMemo } from "react";
+import { TextureLoader } from "three";
 import { useRollerCoaster } from "@/lib/stores/useRollerCoaster";
 
 export function Sky() {
   const { isNightMode } = useRollerCoaster();
+
+  // Load sky.png from public/textures
+  const skyTexture = useMemo(() => {
+    return new TextureLoader().load("/textures/sky.png");
+  }, []);
   
   const parkLights = useMemo(() => {
     const lights: { x: number; z: number; height: number; color: string }[] = [];
@@ -184,10 +190,11 @@ export function Sky() {
       </>
     );
   }
-  
+
+  // DAY MODE (modified)
   return (
     <>
-      <color attach="background" args={["#87CEEB"]} />
+      <primitive attach="background" object={skyTexture} />
       <fog attach="fog" args={["#87CEEB", 100, 400]} />
       
       <mesh position={[50, 40, -50]}>
